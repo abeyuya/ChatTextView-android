@@ -1,12 +1,12 @@
-package com.sikmi.chattextview.examle
+package com.sikmi.chattextviewexample
 
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
-import com.sikmi.chattextview.module.TextBlockMention
-import com.sikmi.chattextview.module.TextBlockType
+import com.sikmi.chattextview.TextBlockMention
+import com.sikmi.chattextview.TextBlockType
 
 class MentionSelectDialog : DialogFragment() {
     private lateinit var listener: MentionDialogListener

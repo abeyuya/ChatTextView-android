@@ -1,4 +1,4 @@
-package com.sikmi.chattextview.examle
+package com.sikmi.chattextviewexample
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -6,11 +6,10 @@ import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ListView
-import com.sikmi.chattextview.R
-import com.sikmi.chattextview.module.ChatTextView
-import com.sikmi.chattextview.module.TextBlock
-import com.sikmi.chattextview.module.TextBlockCustomEmoji
-import com.sikmi.chattextview.module.TextBlockMention
+import com.sikmi.chattextview.ChatTextView
+import com.sikmi.chattextview.TextBlock
+import com.sikmi.chattextview.TextBlockCustomEmoji
+import com.sikmi.chattextview.TextBlockMention
 
 class MainActivity : AppCompatActivity(),
     MentionSelectDialog.MentionDialogListener,

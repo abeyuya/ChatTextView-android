@@ -1,2 +1,2 @@
-include ':app'
-rootProject.name='ChatTextView'
+include ':app', ':chattextview'
+rootProject.name='ChatTextViewExample'

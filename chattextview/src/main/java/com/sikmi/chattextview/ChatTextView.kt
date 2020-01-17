@@ -1,4 +1,4 @@
-package com.sikmi.chattextview.module
+package com.sikmi.chattextview
 
 import android.content.Context
 import android.text.Editable
@@ -6,7 +6,7 @@ import android.text.TextWatcher
 import android.util.AttributeSet
 import android.widget.EditText
 
-class ChatTextView : EditText {
+public class ChatTextView : EditText {
     constructor(context: Context) : super(context, null)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)

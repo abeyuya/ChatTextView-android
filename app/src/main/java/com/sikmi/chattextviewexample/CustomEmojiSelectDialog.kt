@@ -1,13 +1,13 @@
-package com.sikmi.chattextview.examle
+package com.sikmi.chattextviewexample
 
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
-import com.sikmi.chattextview.module.Size
-import com.sikmi.chattextview.module.TextBlockCustomEmoji
-import com.sikmi.chattextview.module.TextBlockType
+import com.sikmi.chattextview.Size
+import com.sikmi.chattextview.TextBlockCustomEmoji
+import com.sikmi.chattextview.TextBlockType
 
 class CustomEmojiSelectDialog: DialogFragment() {
     private lateinit var listener: CustomEmojiDialogListener

@@ -1,31 +1,31 @@
-package com.sikmi.chattextview.module
+package com.sikmi.chattextview
 
-data class Size(
+public data class Size(
     val width: Float,
     val height: Float
 )
 
-enum class TextBlockType {
+public enum class TextBlockType {
     PLAIN, MENTION, CUSTOM_EMOJI
 }
 
-interface TextBlock {
+public interface TextBlock {
     val type: TextBlockType
 }
 
-data class TextBlockPlain(
+public data class TextBlockPlain(
     override val type: TextBlockType,
     val text: String
 ) : TextBlock
 
-data class TextBlockCustomEmoji(
+public data class TextBlockCustomEmoji(
     override val type: TextBlockType,
     val displayImageUrl: String,
     val escapedString: String,
     val size: Size
 ) : TextBlock
 
-data class TextBlockMention(
+public data class TextBlockMention(
     override val type: TextBlockType,
     val displayString: String,
     val hiddenString: String
