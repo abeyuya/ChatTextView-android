@@ -2,36 +2,59 @@ package com.sikmi.chattextview.examle
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Button
-import android.widget.EditText
 import android.widget.ListView
 import com.sikmi.chattextview.R
+import com.sikmi.chattextview.module.ChatTextView
+import com.sikmi.chattextview.module.TextTypeMention
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(),
+    MentionSelectDialog.MentionDialogListener {
+
+    private var chatTextView: ChatTextView? = null
+    private var messageListAdapter: ArrayAdapter<String>? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val list = findViewById<ListView>(R.id.message_list)
-        val adapter = ArrayAdapter<String>(
+        messageListAdapter = ArrayAdapter<String>(
             applicationContext,
             R.layout.message_orange,
             mutableListOf("hello", "world")
         )
-        list.adapter = adapter
 
-        val editText = findViewById<EditText>(R.id.edittext_chatbox)
+        val list = findViewById<ListView>(R.id.message_list)
+        list.adapter = messageListAdapter
+        chatTextView = findViewById(R.id.edittext_chatbox)
 
+        setupSendButton()
+        setupMentionButton()
+        setupCustomEmojiButton()
+    }
+
+    private fun setupSendButton() {
         val sendButton = findViewById<Button>(R.id.button_chatbox_send)
         sendButton.setOnClickListener {
-            val text = editText.text.toString()
-            editText.setText("")
-            adapter.add(text)
-            adapter.notifyDataSetChanged()
-            Log.d("DEBUG", text)
-            Log.d("DEBUG", adapter.count.toString())
+            val text = this.chatTextView?.text.toString()
+            this.chatTextView?.setText("")
+            messageListAdapter?.add(text)
+            messageListAdapter?.notifyDataSetChanged()
         }
+    }
+
+    private fun setupMentionButton() {
+        val mentionButton = findViewById<Button>(R.id.button_chatbox_mention)
+        mentionButton.setOnClickListener {
+            val dialog = MentionSelectDialog()
+            dialog.show(supportFragmentManager, "MentionSelectFragment")
+        }
+    }
+
+    private fun setupCustomEmojiButton() {}
+
+    override fun onMentionClick(mention: TextTypeMention) {
+        chatTextView?.insertMention(mention)
     }
 }
