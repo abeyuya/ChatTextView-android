@@ -7,10 +7,12 @@ import android.widget.Button
 import android.widget.ListView
 import com.sikmi.chattextview.R
 import com.sikmi.chattextview.module.ChatTextView
+import com.sikmi.chattextview.module.TextTypeCustomEmoji
 import com.sikmi.chattextview.module.TextTypeMention
 
 class MainActivity : AppCompatActivity(),
-    MentionSelectDialog.MentionDialogListener {
+    MentionSelectDialog.MentionDialogListener,
+    CustomEmojiSelectDialog.CustomEmojiDialogListener {
 
     private var chatTextView: ChatTextView? = null
     private var messageListAdapter: ArrayAdapter<String>? = null
@@ -52,9 +54,19 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    private fun setupCustomEmojiButton() {}
+    private fun setupCustomEmojiButton() {
+        val customEmojiButton = findViewById<Button>(R.id.button_chatbox_custom_emoji)
+        customEmojiButton.setOnClickListener {
+            val dialog = CustomEmojiSelectDialog()
+            dialog.show(supportFragmentManager, "CustomEmojiSelectFragment")
+        }
+    }
 
     override fun onMentionClick(mention: TextTypeMention) {
         chatTextView?.insertMention(mention)
+    }
+
+    override fun onCustomEmojiClick(customEmoji: TextTypeCustomEmoji) {
+        chatTextView?.insertcustomEmoji(customEmoji)
     }
 }
