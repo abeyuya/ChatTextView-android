@@ -6,14 +6,14 @@ import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import com.sikmi.chattextview.module.Size
-import com.sikmi.chattextview.module.TextTypeCustomEmoji
-import com.sikmi.chattextview.module.TextTypeMention
+import com.sikmi.chattextview.module.TextBlockCustomEmoji
+import com.sikmi.chattextview.module.TextBlockType
 
 class CustomEmojiSelectDialog: DialogFragment() {
     private lateinit var listener: CustomEmojiDialogListener
 
     interface CustomEmojiDialogListener {
-        fun onCustomEmojiClick(customEmoji: TextTypeCustomEmoji)
+        fun onCustomEmojiClick(customEmoji: TextBlockCustomEmoji)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -32,7 +32,8 @@ class CustomEmojiSelectDialog: DialogFragment() {
                 .setTitle("Custom Emoji")
                 .setItems(arr) { _, which ->
                     val s = arr[which]
-                    val e = TextTypeCustomEmoji(
+                    val e = TextBlockCustomEmoji(
+                        type = TextBlockType.CUSTOM_EMOJI,
                         displayImageUrl = url[which],
                         escapedString = s.toString(),
                         size = Size(width = 17f, height = 17f)

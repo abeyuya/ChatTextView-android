@@ -5,13 +5,14 @@ import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
-import com.sikmi.chattextview.module.TextTypeMention
+import com.sikmi.chattextview.module.TextBlockMention
+import com.sikmi.chattextview.module.TextBlockType
 
 class MentionSelectDialog : DialogFragment() {
     private lateinit var listener: MentionDialogListener
 
     interface MentionDialogListener {
-        fun onMentionClick(mention: TextTypeMention)
+        fun onMentionClick(mention: TextBlockMention)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -22,7 +23,8 @@ class MentionSelectDialog : DialogFragment() {
                 .setTitle("Mention")
                 .setItems(arr) { _, which ->
                     val s = arr[which]
-                    val m = TextTypeMention(
+                    val m = TextBlockMention(
+                        type = TextBlockType.MENTION,
                         displayString = s.toString(),
                         hiddenString = "<mention: ${s}>"
                     )
