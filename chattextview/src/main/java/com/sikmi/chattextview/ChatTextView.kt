@@ -4,12 +4,21 @@ import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
-import android.widget.EditText
+import android.widget.RelativeLayout
 
-public class ChatTextView : EditText {
+import com.sunhapper.x.spedit.view.SpXEditText
+
+class ChatTextView : RelativeLayout {
+    private val spEditText: SpXEditText
+
     constructor(context: Context) : super(context, null)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+
+    init {
+        this.spEditText = SpXEditText(context)
+        addView(this.spEditText)
+    }
 
     private lateinit var listener: ChatTextViewListener
 
@@ -18,7 +27,7 @@ public class ChatTextView : EditText {
     }
 
     fun setup(listener: ChatTextViewListener) {
-        addTextChangedListener(object: TextWatcher {
+        spEditText.addTextChangedListener(object: TextWatcher {
             override fun afterTextChanged(s: Editable?) {
             }
 
@@ -38,23 +47,23 @@ public class ChatTextView : EditText {
     }
 
     fun insertPlain(text: String) {
-        this.text.append(text)
+        this.spEditText.text?.append(text)
     }
 
     fun insertcustomEmoji(emoji: TextBlockCustomEmoji) {
         // TODO
-        this.text.append(emoji.escapedString)
+        this.spEditText.text?.append(emoji.escapedString)
     }
 
     fun insertMention(mention: TextBlockMention) {
         // TODO
-        this.text.append(mention.displayString)
+        this.spEditText.text?.append(mention.displayString)
         this.insertPlain(" ")
     }
 
     fun getCurrentTextBlocks(): List<TextBlock> {
         // TODO
-        val text = this.text.toString()
+        val text = this.spEditText.text.toString()
         val block = TextBlockPlain(
             type = TextBlockType.PLAIN,
             text = text
@@ -64,7 +73,7 @@ public class ChatTextView : EditText {
     }
 
     fun clear() {
-        this.setText("")
+        this.spEditText.setText("")
     }
 
     fun render(textBlocks: List<TextBlock>) {

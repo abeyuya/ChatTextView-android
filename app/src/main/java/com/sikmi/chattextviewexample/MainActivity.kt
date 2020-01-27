@@ -6,10 +6,7 @@ import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ListView
-import com.sikmi.chattextview.ChatTextView
-import com.sikmi.chattextview.TextBlock
-import com.sikmi.chattextview.TextBlockCustomEmoji
-import com.sikmi.chattextview.TextBlockMention
+import com.sikmi.chattextview.*
 
 class MainActivity : AppCompatActivity(),
     MentionSelectDialog.MentionDialogListener,
@@ -45,11 +42,19 @@ class MainActivity : AppCompatActivity(),
     private fun setupSendButton() {
         val sendButton = findViewById<Button>(R.id.button_chatbox_send)
         sendButton.setOnClickListener {
-            val text = this.chatTextView?.text.toString()
+            val textBlocks = this.chatTextView?.getCurrentTextBlocks()
             this.chatTextView?.clear()
 
             // TODO
-            messageListAdapter?.add(text)
+            val text = textBlocks?.first()?.run {
+                when (this) {
+                    is TextBlockPlain -> { this.text }
+                    is TextBlockMention -> { this.displayString }
+                    is TextBlockCustomEmoji -> { this.escapedString }
+                    else -> { "" }
+                }
+            }
+            messageListAdapter?.add(text ?: "")
             messageListAdapter?.notifyDataSetChanged()
         }
     }
