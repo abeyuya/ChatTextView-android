@@ -61,10 +61,12 @@ class ChatTextView @JvmOverloads constructor(
                 if (after < count) {
                     val deleted = s?.subSequence(
                         start + after,
-                        start + after + 1
+                        start + after + count
                     ) as? Spannable ?: return
 
-                     shouldDeleteMentionSpans = deleted.getSpans<MentionSpan>(0, 1).toList()
+                     shouldDeleteMentionSpans = deleted
+                         .getSpans<MentionSpan>(0, deleted.length)
+                         .toList()
                 }
             }
 
