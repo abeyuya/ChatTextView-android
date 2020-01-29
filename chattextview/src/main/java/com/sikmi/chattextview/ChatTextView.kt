@@ -8,32 +8,33 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
-import com.bumptech.glide.Glide
-import com.sunhapper.glide.drawable.DrawableTarget
+import java.io.IOException
 
+import com.sunhapper.glide.drawable.DrawableTarget
 import com.sunhapper.x.spedit.createResizeGifDrawableSpan
 import com.sunhapper.x.spedit.gif.drawable.ProxyDrawable
 import com.sunhapper.x.spedit.insertSpannableString
 import com.sunhapper.x.spedit.view.SpXEditText
-import java.io.IOException
 
-class ChatTextView : RelativeLayout {
+import com.bumptech.glide.Glide
+
+class ChatTextView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : RelativeLayout(context, attrs, defStyleAttr) {
+
     interface ChatTextViewListener {
         fun didChange(textView: ChatTextView, textBlocks: List<TextBlock>)
     }
 
-    private val spEditText: SpXEditText
-    private lateinit var listener: ChatTextViewListener
-
-    constructor(context: Context) : super(context, null)
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+    private val spEditText = SpXEditText(context)
 
     init {
-        this.spEditText = SpXEditText(context)
-        this.spEditText.maxLines = 3
+        spEditText.maxLines = 3
+        spEditText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
         addView(
-            this.spEditText,
+            spEditText,
             LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
@@ -42,7 +43,6 @@ class ChatTextView : RelativeLayout {
     }
 
     fun setup(listener: ChatTextViewListener) {
-        spEditText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
         spEditText.addTextChangedListener(object: TextWatcher {
             override fun afterTextChanged(s: Editable?) {
             }
@@ -63,8 +63,6 @@ class ChatTextView : RelativeLayout {
                 listener.didChange(this@ChatTextView, listOf(block))
             }
         })
-
-        this.listener = listener
     }
 
     fun insertPlain(text: String) {
@@ -72,14 +70,14 @@ class ChatTextView : RelativeLayout {
     }
 
     fun insertcustomEmoji(emoji: TextBlockCustomEmoji) {
-        spEditText?.text?.let {
+        spEditText.text?.let {
             val charSequence = createGlideText(emoji)
             insertSpannableString(it, charSequence)
         }
     }
 
     fun insertMention(mention: TextBlockMention) {
-        val ss = getMentionSppanableString(mention.displayString)
+        val ss = getMentionSpannableString(mention.displayString)
         replace(ss)
         this.insertPlain(" ")
     }
@@ -107,7 +105,7 @@ class ChatTextView : RelativeLayout {
     // private methods
     //
 
-    private fun getMentionSppanableString(displayString: String): Spannable {
+    private fun getMentionSpannableString(displayString: String): Spannable {
         val styleSpan = ForegroundColorSpan(Color.MAGENTA)
         val spannableString = SpannableString(displayString)
         spannableString.setSpan(
@@ -127,7 +125,7 @@ class ChatTextView : RelativeLayout {
     }
 
     private fun replace(charSequence: CharSequence) {
-        spEditText?.text?.let {
+        spEditText.text?.let {
             insertSpannableString(it, charSequence)
         }
     }
