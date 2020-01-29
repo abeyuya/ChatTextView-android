@@ -1,15 +1,29 @@
 package com.sikmi.chattextview
 
 import android.content.Context
-import android.text.Editable
-import android.text.TextWatcher
+import android.graphics.Color
+import android.text.*
+import android.text.style.ForegroundColorSpan
 import android.util.AttributeSet
+import android.view.View
+import android.view.ViewGroup
 import android.widget.RelativeLayout
+import com.bumptech.glide.Glide
+import com.sunhapper.glide.drawable.DrawableTarget
 
+import com.sunhapper.x.spedit.createResizeGifDrawableSpan
+import com.sunhapper.x.spedit.gif.drawable.ProxyDrawable
+import com.sunhapper.x.spedit.insertSpannableString
 import com.sunhapper.x.spedit.view.SpXEditText
+import java.io.IOException
 
 class ChatTextView : RelativeLayout {
+    interface ChatTextViewListener {
+        fun didChange(textView: ChatTextView, textBlocks: List<TextBlock>)
+    }
+
     private val spEditText: SpXEditText
+    private lateinit var listener: ChatTextViewListener
 
     constructor(context: Context) : super(context, null)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
@@ -17,16 +31,18 @@ class ChatTextView : RelativeLayout {
 
     init {
         this.spEditText = SpXEditText(context)
-        addView(this.spEditText)
-    }
-
-    private lateinit var listener: ChatTextViewListener
-
-    interface ChatTextViewListener {
-        fun didChange(textView: ChatTextView, textBlocks: List<TextBlock>)
+        this.spEditText.maxLines = 3
+        addView(
+            this.spEditText,
+            LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        )
     }
 
     fun setup(listener: ChatTextViewListener) {
+        spEditText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
         spEditText.addTextChangedListener(object: TextWatcher {
             override fun afterTextChanged(s: Editable?) {
             }
@@ -35,6 +51,11 @@ class ChatTextView : RelativeLayout {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (s.toString() == "") {
+                    listener.didChange(this@ChatTextView, listOf())
+                    return
+                }
+
                 val block = TextBlockPlain(
                     type = TextBlockType.PLAIN,
                     text = s.toString()
@@ -51,13 +72,15 @@ class ChatTextView : RelativeLayout {
     }
 
     fun insertcustomEmoji(emoji: TextBlockCustomEmoji) {
-        // TODO
-        this.spEditText.text?.append(emoji.escapedString)
+        spEditText?.text?.let {
+            val charSequence = createGlideText(emoji)
+            insertSpannableString(it, charSequence)
+        }
     }
 
     fun insertMention(mention: TextBlockMention) {
-        // TODO
-        this.spEditText.text?.append(mention.displayString)
+        val ss = getMentionSppanableString(mention.displayString)
+        replace(ss)
         this.insertPlain(" ")
     }
 
@@ -78,5 +101,45 @@ class ChatTextView : RelativeLayout {
 
     fun render(textBlocks: List<TextBlock>) {
         // TODO
+    }
+
+    //
+    // private methods
+    //
+
+    private fun getMentionSppanableString(displayString: String): Spannable {
+        val styleSpan = ForegroundColorSpan(Color.MAGENTA)
+        val spannableString = SpannableString(displayString)
+        spannableString.setSpan(
+            styleSpan, 0,
+            spannableString.length,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        spannableString.setSpan(
+            this,
+            0,
+            spannableString.length,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        val stringBuilder = SpannableStringBuilder()
+        stringBuilder.append(spannableString)
+        return stringBuilder
+    }
+
+    private fun replace(charSequence: CharSequence) {
+        spEditText?.text?.let {
+            insertSpannableString(it, charSequence)
+        }
+    }
+
+    @Throws(IOException::class)
+    private fun createGlideText(emoji: TextBlockCustomEmoji): CharSequence {
+        val d = context.getDrawable(R.drawable.emoji)
+        val proxyDrawable = ProxyDrawable()
+        Glide.with(this)
+            .load(emoji.displayImageUrl)
+            .placeholder(d)
+            .into(DrawableTarget(proxyDrawable))
+        return createResizeGifDrawableSpan(proxyDrawable, emoji.escapedString)
     }
 }

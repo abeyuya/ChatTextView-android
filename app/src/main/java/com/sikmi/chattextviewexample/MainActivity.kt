@@ -13,13 +13,14 @@ class MainActivity : AppCompatActivity(),
     CustomEmojiSelectDialog.CustomEmojiDialogListener {
 
     private var chatTextView: ChatTextView? = null
+    private var sendButton: Button? = null
     private var messageListAdapter: ArrayAdapter<String>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        messageListAdapter = ArrayAdapter<String>(
+        messageListAdapter = ArrayAdapter(
             applicationContext,
             R.layout.message_orange,
             mutableListOf("hello", "world")
@@ -31,6 +32,7 @@ class MainActivity : AppCompatActivity(),
         chatTextView?.setup(object: ChatTextView.ChatTextViewListener {
             override fun didChange(textView: ChatTextView, textBlocks: List<TextBlock>) {
                 Log.d("ChatTextView", textBlocks.toString())
+                sendButton?.isEnabled = !textBlocks.isEmpty()
             }
         })
 
@@ -40,8 +42,8 @@ class MainActivity : AppCompatActivity(),
     }
 
     private fun setupSendButton() {
-        val sendButton = findViewById<Button>(R.id.button_chatbox_send)
-        sendButton.setOnClickListener {
+        sendButton = findViewById(R.id.button_chatbox_send)
+        sendButton?.setOnClickListener {
             val textBlocks = this.chatTextView?.getCurrentTextBlocks()
             this.chatTextView?.clear()
 
