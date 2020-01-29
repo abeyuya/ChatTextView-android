@@ -12,9 +12,9 @@ class MainActivity : AppCompatActivity(),
     MentionSelectDialog.MentionDialogListener,
     CustomEmojiSelectDialog.CustomEmojiDialogListener {
 
-    private var chatTextView: ChatTextView? = null
-    private var sendButton: Button? = null
-    private var messageListAdapter: ArrayAdapter<String>? = null
+    private lateinit var chatTextView: ChatTextView
+    private lateinit var sendButton: Button
+    private lateinit var messageListAdapter: ArrayAdapter<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,10 +29,10 @@ class MainActivity : AppCompatActivity(),
         val list = findViewById<ListView>(R.id.message_list)
         list.adapter = messageListAdapter
         chatTextView = findViewById(R.id.edittext_chatbox)
-        chatTextView?.setup(object: ChatTextView.ChatTextViewListener {
+        chatTextView.setup(object: ChatTextView.ChatTextViewListener {
             override fun didChange(textView: ChatTextView, textBlocks: List<TextBlock>) {
                 Log.d("ChatTextView", textBlocks.toString())
-                sendButton?.isEnabled = !textBlocks.isEmpty()
+                sendButton.isEnabled = textBlocks.isNotEmpty()
             }
         })
 
@@ -43,9 +43,9 @@ class MainActivity : AppCompatActivity(),
 
     private fun setupSendButton() {
         sendButton = findViewById(R.id.button_chatbox_send)
-        sendButton?.setOnClickListener {
-            val textBlocks = this.chatTextView?.getCurrentTextBlocks()
-            this.chatTextView?.clear()
+        sendButton.setOnClickListener {
+            val textBlocks = this.chatTextView.getCurrentTextBlocks()
+            this.chatTextView.clear()
 
             // TODO
             val text = textBlocks?.first()?.run {
@@ -56,8 +56,8 @@ class MainActivity : AppCompatActivity(),
                     else -> { "" }
                 }
             }
-            messageListAdapter?.add(text ?: "")
-            messageListAdapter?.notifyDataSetChanged()
+            messageListAdapter.add(text)
+            messageListAdapter.notifyDataSetChanged()
         }
     }
 
@@ -78,10 +78,10 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun onMentionClick(mention: TextBlockMention) {
-        chatTextView?.insertMention(mention)
+        chatTextView.insertMention(mention)
     }
 
     override fun onCustomEmojiClick(customEmoji: TextBlockCustomEmoji) {
-        chatTextView?.insertcustomEmoji(customEmoji)
+        chatTextView.insertcustomEmoji(customEmoji)
     }
 }
