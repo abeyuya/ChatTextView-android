@@ -3,11 +3,11 @@ package com.sikmi.chattextview
 import android.content.Context
 import android.graphics.Color
 import android.text.*
-import android.text.style.ForegroundColorSpan
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
+import androidx.core.text.getSpans
 import java.io.IOException
 
 import com.sunhapper.glide.drawable.DrawableTarget
@@ -44,10 +44,28 @@ class ChatTextView @JvmOverloads constructor(
 
     fun setup(listener: ChatTextViewListener) {
         spEditText.addTextChangedListener(object: TextWatcher {
+            private var shouldDeleteMentionSpans = listOf<MentionSpan>()
+
             override fun afterTextChanged(s: Editable?) {
+                for (span in shouldDeleteMentionSpans) {
+                    val start = s?.getSpanStart(span) ?: continue
+                    if (start == -1) { continue }
+                    val end = s.getSpanEnd(span)
+                    if (end == -1) { continue }
+                    s.delete(start, end)
+                }
+                shouldDeleteMentionSpans = listOf()
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                if (after < count) {
+                    val deleted = s?.subSequence(
+                        start + after,
+                        start + after + 1
+                    ) as? Spannable ?: return
+
+                     shouldDeleteMentionSpans = deleted.getSpans<MentionSpan>(0, 1).toList()
+                }
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -106,15 +124,9 @@ class ChatTextView @JvmOverloads constructor(
     //
 
     private fun getMentionSpannableString(displayString: String): Spannable {
-        val styleSpan = ForegroundColorSpan(Color.MAGENTA)
         val spannableString = SpannableString(displayString)
         spannableString.setSpan(
-            styleSpan, 0,
-            spannableString.length,
-            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-        )
-        spannableString.setSpan(
-            this,
+            MentionSpan(Color.MAGENTA),
             0,
             spannableString.length,
             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
