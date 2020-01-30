@@ -11,7 +11,6 @@ import androidx.core.text.getSpans
 import java.io.IOException
 
 import com.sunhapper.glide.drawable.DrawableTarget
-import com.sunhapper.x.spedit.createResizeGifDrawableSpan
 import com.sunhapper.x.spedit.gif.drawable.ProxyDrawable
 import com.sunhapper.x.spedit.insertSpannableString
 import com.sunhapper.x.spedit.view.SpXEditText
@@ -100,7 +99,7 @@ class ChatTextView @JvmOverloads constructor(
     fun insertMention(mention: TextBlockMention) {
         val ss = getMentionSpannableString(mention)
         replace(ss)
-        this.insertPlain(" ")
+        insertPlain(" ")
     }
 
     fun getCurrentTextBlocks(): List<TextBlock> {
@@ -109,11 +108,20 @@ class ChatTextView @JvmOverloads constructor(
     }
 
     fun clear() {
-        this.spEditText.setText("")
+        spEditText.setText("")
     }
 
     fun render(textBlocks: List<TextBlock>) {
-        // TODO
+        textBlocks.forEach {
+            when (it) {
+                is TextBlockPlain -> { insertPlain(it.text) }
+                is TextBlockCustomEmoji -> { insertCustomEmoji(it) }
+                is TextBlockMention -> { insertMention(it) }
+                else -> {
+                    // TODO
+                }
+            }
+        }
     }
 
     //

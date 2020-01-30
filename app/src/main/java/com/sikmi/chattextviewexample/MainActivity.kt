@@ -3,7 +3,6 @@ package com.sikmi.chattextviewexample
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ListView
 import com.sikmi.chattextview.*
@@ -14,20 +13,16 @@ class MainActivity : AppCompatActivity(),
 
     private lateinit var chatTextView: ChatTextView
     private lateinit var sendButton: Button
-    private lateinit var messageListAdapter: ArrayAdapter<String>
+    private lateinit var messageListAdapter: MessageListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        messageListAdapter = ArrayAdapter(
-            applicationContext,
-            R.layout.message_orange,
-            mutableListOf("hello", "world")
-        )
-
+        messageListAdapter = MessageListAdapter(applicationContext)
         val list = findViewById<ListView>(R.id.message_list)
         list.adapter = messageListAdapter
+
         chatTextView = findViewById(R.id.edittext_chatbox)
         chatTextView.setup(object: ChatTextView.ChatTextViewListener {
             override fun didChange(textView: ChatTextView, textBlocks: List<TextBlock>) {
@@ -46,17 +41,7 @@ class MainActivity : AppCompatActivity(),
         sendButton.setOnClickListener {
             val textBlocks = chatTextView.getCurrentTextBlocks()
 
-            val text = textBlocks
-                .map {
-                    when (it) {
-                        is TextBlockPlain -> { it.text }
-                        is TextBlockMention -> { it.displayString }
-                        is TextBlockCustomEmoji -> { it.escapedString }
-                        else -> { "" }
-                    }
-                }
-                .joinToString("")
-            messageListAdapter.add(text)
+            messageListAdapter.add(textBlocks)
             messageListAdapter.notifyDataSetChanged()
 
             chatTextView.clear()
