@@ -44,20 +44,22 @@ class MainActivity : AppCompatActivity(),
     private fun setupSendButton() {
         sendButton = findViewById(R.id.button_chatbox_send)
         sendButton.setOnClickListener {
-            val textBlocks = this.chatTextView.getCurrentTextBlocks()
-            this.chatTextView.clear()
+            val textBlocks = chatTextView.getCurrentTextBlocks()
 
-            // TODO
-            val text = textBlocks?.first()?.run {
-                when (this) {
-                    is TextBlockPlain -> { this.text }
-                    is TextBlockMention -> { this.displayString }
-                    is TextBlockCustomEmoji -> { this.escapedString }
-                    else -> { "" }
+            val text = textBlocks
+                .map {
+                    when (it) {
+                        is TextBlockPlain -> { it.text }
+                        is TextBlockMention -> { it.displayString }
+                        is TextBlockCustomEmoji -> { it.escapedString }
+                        else -> { "" }
+                    }
                 }
-            }
+                .joinToString("")
             messageListAdapter.add(text)
             messageListAdapter.notifyDataSetChanged()
+
+            chatTextView.clear()
         }
     }
 
@@ -82,6 +84,6 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun onCustomEmojiClick(customEmoji: TextBlockCustomEmoji) {
-        chatTextView.insertcustomEmoji(customEmoji)
+        chatTextView.insertCustomEmoji(customEmoji)
     }
 }

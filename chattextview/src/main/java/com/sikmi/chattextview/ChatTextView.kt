@@ -90,7 +90,7 @@ class ChatTextView @JvmOverloads constructor(
         this.spEditText.text?.append(text)
     }
 
-    fun insertcustomEmoji(emoji: TextBlockCustomEmoji) {
+    fun insertCustomEmoji(emoji: TextBlockCustomEmoji) {
         spEditText.text?.let {
             val charSequence = createGlideText(emoji)
             insertSpannableString(it, charSequence)
@@ -98,20 +98,14 @@ class ChatTextView @JvmOverloads constructor(
     }
 
     fun insertMention(mention: TextBlockMention) {
-        val ss = getMentionSpannableString(mention.displayString)
+        val ss = getMentionSpannableString(mention)
         replace(ss)
         this.insertPlain(" ")
     }
 
     fun getCurrentTextBlocks(): List<TextBlock> {
-        // TODO
-        val text = this.spEditText.text.toString()
-        val block = TextBlockPlain(
-            type = TextBlockType.PLAIN,
-            text = text
-        )
-
-        return listOf(block)
+        val spannable = spEditText.text as? Spannable ?: return listOf()
+        return Parser.parse(spannable)
     }
 
     fun clear() {
@@ -126,10 +120,10 @@ class ChatTextView @JvmOverloads constructor(
     // private methods
     //
 
-    private fun getMentionSpannableString(displayString: String): Spannable {
-        val spannableString = SpannableString(displayString)
+    private fun getMentionSpannableString(mention: TextBlockMention): Spannable {
+        val spannableString = SpannableString(mention.displayString)
         spannableString.setSpan(
-            MentionSpan(Color.MAGENTA),
+            MentionSpan(Color.BLUE, mention),
             0,
             spannableString.length,
             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
@@ -153,6 +147,11 @@ class ChatTextView @JvmOverloads constructor(
             .load(emoji.displayImageUrl)
             .placeholder(d)
             .into(DrawableTarget(proxyDrawable))
-        return createResizeGifDrawableSpan(proxyDrawable, emoji.escapedString)
+
+        return CustomEmojiSpan.createResizeGifDrawableSpan(
+            proxyDrawable,
+            emoji.escapedString,
+            emoji
+        )
     }
 }

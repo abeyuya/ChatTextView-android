@@ -36,114 +36,164 @@ data class TextBlockMention(
     val hiddenString: String
 ) : TextBlock
 
+data class BlockInfo(
+    val textBlock: TextBlock,
+    val span: Any?
+)
+
 object Parser {
     fun parse(spannable: Spannable): List<TextBlock> {
-        var result = mutableListOf<TextBlock>()
+        var result = mutableListOf<BlockInfo>()
 
         for (i in 0 until (spannable.length - 1)) {
             val spans = spannable.getSpans<Any>(i, i + 1)
             val string = spannable[i].toString()
 
             // mention
-            val mentionBlock = spans
+            val mentionSpan = spans
                 .find { it is MentionSpan }
-                ?.run {
-                    TextBlockMention(
-                        displayString = string,
-                        hiddenString = string
-                    )
-                }
-            if (mentionBlock != null) {
-                result.add(mentionBlock)
+                .run { this as? MentionSpan }
+            if (mentionSpan != null) {
+                val blockInfo = BlockInfo(
+                    textBlock = mentionSpan.mention,
+                    span = mentionSpan
+                )
+                result.add(blockInfo)
                 continue
             }
 
             // custom emoji
-            // TODO
+            val customEmojiSpan = spans
+                .find { it is CustomEmojiSpan }
+                .run { this as? CustomEmojiSpan }
+            if (customEmojiSpan != null) {
+                val blockInfo = BlockInfo(
+                    textBlock = customEmojiSpan.customEmoji,
+                    span = customEmojiSpan
+                )
+                result.add(blockInfo)
+                continue
+            }
 
             val plainBlock = TextBlockPlain(text = string)
-            result.add(plainBlock)
+            result.add(BlockInfo(textBlock = plainBlock, span = null))
         }
 
         return bundle(result)
     }
 
-    private fun bundle(parsedResult: List<TextBlock>): List<TextBlock> {
+    private fun bundle(parsedResult: List<BlockInfo>): List<TextBlock> {
         var result = mutableListOf<TextBlock>()
-        var prev: TextBlockType? = null
-        var bundlingPlain: String? = null
-        var bundlingMention: String? = null
+        var prev: BlockInfo? = null
+        var bundlingPlain: TextBlockPlain? = null
+        var bundlingCustomEmoji: CustomEmojiSpan? = null
+        var bundlingMention: MentionSpan? = null
 
         fun insertBundlingPlain() {
             bundlingPlain?.let {
-                result.add(TextBlockPlain(text = it))
+                result.add(it)
                 bundlingPlain = null
             }
         }
         fun insertBundlingMention() {
             bundlingMention?.let {
-//                guard let usedMention = usedMentions.first(where: { $0.displayString == b }) else { return }
-                val m = TextBlockMention(displayString = it, hiddenString = it)
-                result.add(m)
+                result.add(it.mention)
                 bundlingMention = null
             }
         }
+        fun insertBundlingCustomEmoji() {
+            bundlingCustomEmoji?.let {
+                result.add(it.customEmoji)
+                bundlingCustomEmoji = null
+            }
+        }
 
-        for (t in parsedResult) {
+        for (blockInfo in parsedResult) {
+            val t = blockInfo.textBlock
+            val span = blockInfo?.span
+
             try {
                 if (t is TextBlockPlain) {
-                    val plain = t as? TextBlockPlain ?: continue
+                    val newBock = t as? TextBlockPlain ?: continue
+
+                    bundlingPlain?.let {
+                        val newText = it.text + newBock.text
+                        bundlingPlain = TextBlockPlain(text = newText)
+                    } ?: run {
+                        bundlingPlain = newBock
+                    }
 
                     prev?.let {
-                        if (prev == TextBlockType.PLAIN) {
-                            bundlingPlain += t.text
-                        }
-                        if (prev == TextBlockType.CUSTOM_EMOJI) {
-                            bundlingPlain = t.text
-                        }
-                        if (prev == TextBlockType.MENTION) {
+                        if (it.textBlock is TextBlockPlain) {
+                            // skip because this custom emoji has already handled
+                        } else {
+                            insertBundlingCustomEmoji()
                             insertBundlingMention()
-                            bundlingPlain = t.text
                         }
-                    } ?: run {
-                        bundlingPlain = plain.text
                     }
 
                     continue
                 }
 
                 if (t is TextBlockCustomEmoji) {
-                    insertBundlingMention()
-                    insertBundlingPlain()
-                    result.add(t)
+                    val newSpan = span as? CustomEmojiSpan ?: continue
+
+                    bundlingCustomEmoji?.let {
+                        if (it.customEmojiId == newSpan.customEmojiId) {
+                            // skip because this custom emoji has already handled
+                        } else {
+                            insertBundlingCustomEmoji()
+                            bundlingCustomEmoji = newSpan
+                        }
+                    } ?: run {
+                        bundlingCustomEmoji = newSpan
+                    }
+
+                    prev?.let {
+                        if (it.textBlock is TextBlockCustomEmoji) {
+                            // do nothing
+                        } else {
+                            insertBundlingMention()
+                            insertBundlingPlain()
+                        }
+                    }
+
                     continue
                 }
 
                 if (t is TextBlockMention) {
-                    val mention = t as? TextBlockMention ?: continue
+                    val newSpan = span as? MentionSpan ?: continue
 
-                    prev?.let {
-                        if (prev == TextBlockType.PLAIN || prev == TextBlockType.CUSTOM_EMOJI) {
+                    bundlingMention?.let {
+                        if (it.mentionId == newSpan.mentionId) {
+                            // skip because this mention has already handled
+                        } else {
                             insertBundlingMention()
-                            insertBundlingPlain()
-                            bundlingMention = mention.displayString
-                        }
-                        if (prev == TextBlockType.MENTION) {
-                            bundlingMention += t.displayString
+                            bundlingMention = newSpan
                         }
                     } ?: run {
-                        bundlingMention = mention.displayString
+                        bundlingMention = newSpan
+                    }
+
+                    prev?.let {
+                        if (it.textBlock is TextBlockMention) {
+                            // do nothing
+                        } else {
+                            insertBundlingCustomEmoji()
+                            insertBundlingPlain()
+                        }
                     }
 
                     continue
                 }
 
             } finally {
-                prev = t.type
+                prev = blockInfo
             }
         }
 
         insertBundlingPlain()
+        insertBundlingCustomEmoji()
         insertBundlingMention()
 
         return result
