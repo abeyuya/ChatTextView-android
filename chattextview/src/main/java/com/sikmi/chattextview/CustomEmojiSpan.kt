@@ -7,9 +7,7 @@ import android.text.style.UpdateLayout
 import com.sunhapper.x.spedit.gif.span.ResizeIsoheightImageSpan
 import java.util.*
 
-class CustomEmojiSpan(
-    customEmoji: TextBlockCustomEmoji
-): UpdateLayout {
+class CustomEmojiSpan(customEmoji: TextBlockCustomEmoji): UpdateLayout {
 
     val customEmojiId = UUID.randomUUID().toString()
     val customEmoji = customEmoji
@@ -17,21 +15,20 @@ class CustomEmojiSpan(
     companion object {
         fun createResizeGifDrawableSpan(
             gifDrawable: Drawable,
-            text: CharSequence,
             customEmoji: TextBlockCustomEmoji
         ): Spannable {
-            val spannable = SpannableString(text)
+            val spannable = SpannableString(customEmoji.escapedString)
 
             spannable.setSpan(
                 CustomEmojiSpan(customEmoji),
                 0,
-                text.length,
+                customEmoji.escapedString.length,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
             spannable.setSpan(
                 ResizeIsoheightImageSpan(gifDrawable),
                 0,
-                text.length,
+                customEmoji.escapedString.length,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
 

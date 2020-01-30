@@ -18,6 +18,7 @@ class MessageListAdapter(
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val messageView  = layoutInflater.inflate(R.layout.message_orange, parent, false)
         val chatTextView = messageView.findViewById<ChatTextView>(R.id.text_message_body)
+        chatTextView.enableRenderOnlyStyle()
 
         val textBlocks = getItem(position)
         textBlocks?.let {

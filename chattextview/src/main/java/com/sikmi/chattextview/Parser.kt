@@ -45,7 +45,7 @@ object Parser {
     fun parse(spannable: Spannable): List<TextBlock> {
         var result = mutableListOf<BlockInfo>()
 
-        for (i in 0 until (spannable.length - 1)) {
+        for (i in 0 until spannable.length) {
             val spans = spannable.getSpans<Any>(i, i + 1)
             val string = spannable[i].toString()
 
@@ -114,13 +114,13 @@ object Parser {
 
             try {
                 if (t is TextBlockPlain) {
-                    val newBock = t as? TextBlockPlain ?: continue
+                    val newBlock = t as? TextBlockPlain ?: continue
 
                     bundlingPlain?.let {
-                        val newText = it.text + newBock.text
+                        val newText = it.text + newBlock.text
                         bundlingPlain = TextBlockPlain(text = newText)
                     } ?: run {
-                        bundlingPlain = newBock
+                        bundlingPlain = newBlock
                     }
 
                     prev?.let {

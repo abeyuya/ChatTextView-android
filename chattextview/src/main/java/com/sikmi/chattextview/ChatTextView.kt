@@ -32,6 +32,7 @@ class ChatTextView @JvmOverloads constructor(
     init {
         spEditText.maxLines = 3
         spEditText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+        spEditText.background = null
         addView(
             spEditText,
             LayoutParams(
@@ -124,6 +125,16 @@ class ChatTextView @JvmOverloads constructor(
         }
     }
 
+    fun enableRenderOnlyStyle() {
+        spEditText.isEnabled = false
+        spEditText.setTextColor(Color.WHITE)
+        spEditText.maxLines = 9999
+        spEditText.layoutParams = LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+    }
+
     //
     // private methods
     //
@@ -156,10 +167,6 @@ class ChatTextView @JvmOverloads constructor(
             .placeholder(d)
             .into(DrawableTarget(proxyDrawable))
 
-        return CustomEmojiSpan.createResizeGifDrawableSpan(
-            proxyDrawable,
-            emoji.escapedString,
-            emoji
-        )
+        return CustomEmojiSpan.createResizeGifDrawableSpan(proxyDrawable, emoji)
     }
 }
