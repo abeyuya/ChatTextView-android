@@ -76,11 +76,12 @@ class ChatTextView @JvmOverloads constructor(
                     return
                 }
 
-                val block = TextBlockPlain(
-                    type = TextBlockType.PLAIN,
-                    text = s.toString()
-                )
-                listener.didChange(this@ChatTextView, listOf(block))
+                val spannable = s as? Spannable
+
+                spannable?.let {
+                    val blocks = Parser.parse(it)
+                    listener.didChange(this@ChatTextView, blocks)
+                }
             }
         })
     }
