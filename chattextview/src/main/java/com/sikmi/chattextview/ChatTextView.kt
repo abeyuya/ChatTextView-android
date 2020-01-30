@@ -1,73 +1,172 @@
 package com.sikmi.chattextview
 
 import android.content.Context
-import android.text.Editable
-import android.text.TextWatcher
+import android.graphics.Color
+import android.text.*
 import android.util.AttributeSet
-import android.widget.EditText
+import android.view.View
+import android.view.ViewGroup
+import android.widget.RelativeLayout
+import androidx.core.text.getSpans
+import java.io.IOException
 
-public class ChatTextView : EditText {
-    constructor(context: Context) : super(context, null)
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+import com.sunhapper.glide.drawable.DrawableTarget
+import com.sunhapper.x.spedit.gif.drawable.ProxyDrawable
+import com.sunhapper.x.spedit.insertSpannableString
+import com.sunhapper.x.spedit.view.SpXEditText
 
-    private lateinit var listener: ChatTextViewListener
+import com.bumptech.glide.Glide
+
+class ChatTextView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : RelativeLayout(context, attrs, defStyleAttr) {
 
     interface ChatTextViewListener {
         fun didChange(textView: ChatTextView, textBlocks: List<TextBlock>)
     }
 
+    private val spEditText = SpXEditText(context)
+
+    init {
+        spEditText.maxLines = 3
+        spEditText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+        spEditText.background = null
+        addView(
+            spEditText,
+            LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        )
+    }
+
     fun setup(listener: ChatTextViewListener) {
-        addTextChangedListener(object: TextWatcher {
+        spEditText.addTextChangedListener(object: TextWatcher {
+            private var shouldDeleteMentionSpans = listOf<MentionSpan>()
+
             override fun afterTextChanged(s: Editable?) {
+                for (span in shouldDeleteMentionSpans) {
+                    val start = s?.getSpanStart(span) ?: continue
+                    if (start == -1) { continue }
+                    val end = s.getSpanEnd(span)
+                    if (end == -1) { continue }
+                    s.delete(start, end)
+                }
+                shouldDeleteMentionSpans = listOf()
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                if (after < count) {
+                    val deleted = s?.subSequence(
+                        start + after,
+                        start + after + count
+                    ) as? Spannable ?: return
+
+                     shouldDeleteMentionSpans = deleted
+                         .getSpans<MentionSpan>(0, deleted.length)
+                         .toList()
+                }
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val block = TextBlockPlain(
-                    type = TextBlockType.PLAIN,
-                    text = s.toString()
-                )
-                listener.didChange(this@ChatTextView, listOf(block))
+                if (s.toString() == "") {
+                    listener.didChange(this@ChatTextView, listOf())
+                    return
+                }
+
+                val spannable = s as? Spannable
+
+                spannable?.let {
+                    val blocks = Parser.parse(it)
+                    listener.didChange(this@ChatTextView, blocks)
+                }
             }
         })
-
-        this.listener = listener
     }
 
     fun insertPlain(text: String) {
-        this.text.append(text)
+        this.spEditText.text?.append(text)
     }
 
-    fun insertcustomEmoji(emoji: TextBlockCustomEmoji) {
-        // TODO
-        this.text.append(emoji.escapedString)
+    fun insertCustomEmoji(emoji: TextBlockCustomEmoji) {
+        spEditText.text?.let {
+            val charSequence = createGlideText(emoji)
+            insertSpannableString(it, charSequence)
+        }
     }
 
     fun insertMention(mention: TextBlockMention) {
-        // TODO
-        this.text.append(mention.displayString)
-        this.insertPlain(" ")
+        val ss = getMentionSpannableString(mention)
+        replace(ss)
+        insertPlain(" ")
     }
 
     fun getCurrentTextBlocks(): List<TextBlock> {
-        // TODO
-        val text = this.text.toString()
-        val block = TextBlockPlain(
-            type = TextBlockType.PLAIN,
-            text = text
-        )
-
-        return listOf(block)
+        val spannable = spEditText.text as? Spannable ?: return listOf()
+        return Parser.parse(spannable)
     }
 
     fun clear() {
-        this.setText("")
+        spEditText.setText("")
     }
 
     fun render(textBlocks: List<TextBlock>) {
-        // TODO
+        textBlocks.forEach {
+            when (it) {
+                is TextBlockPlain -> { insertPlain(it.text) }
+                is TextBlockCustomEmoji -> { insertCustomEmoji(it) }
+                is TextBlockMention -> { insertMention(it) }
+                else -> {
+                    // TODO
+                }
+            }
+        }
+    }
+
+    fun enableRenderOnlyStyle() {
+        spEditText.isEnabled = false
+        spEditText.setTextColor(Color.WHITE)
+        spEditText.maxLines = 9999
+        spEditText.layoutParams = LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+    }
+
+    //
+    // private methods
+    //
+
+    private fun getMentionSpannableString(mention: TextBlockMention): Spannable {
+        val spannableString = SpannableString(mention.displayString)
+        spannableString.setSpan(
+            MentionSpan(Color.BLUE, mention),
+            0,
+            spannableString.length,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        val stringBuilder = SpannableStringBuilder()
+        stringBuilder.append(spannableString)
+        return stringBuilder
+    }
+
+    private fun replace(charSequence: CharSequence) {
+        spEditText.text?.let {
+            insertSpannableString(it, charSequence)
+        }
+    }
+
+    @Throws(IOException::class)
+    private fun createGlideText(emoji: TextBlockCustomEmoji): CharSequence {
+        val d = context.getDrawable(R.drawable.emoji)
+        val proxyDrawable = ProxyDrawable()
+        Glide.with(this)
+            .load(emoji.displayImageUrl)
+            .placeholder(d)
+            .into(DrawableTarget(proxyDrawable))
+
+        return CustomEmojiSpan.createResizeGifDrawableSpan(proxyDrawable, emoji)
     }
 }
