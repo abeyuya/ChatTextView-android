@@ -16,9 +16,6 @@ android {
     }
 
     buildTypes {
-        debug {
-            minifyEnabled false
-        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -32,6 +29,10 @@ allprojects {
             url 'https://jitpack.io'
         }
     }
+}
+
+project.ext {
+    excludeAppGlideModule = true
 }
 
 dependencies {
@@ -57,7 +58,7 @@ uploadArchives {
     repositories {
         mavenDeployer {
             repository url: "file://${repo.absolutePath}"
-            pom.version = '0.4.1'
+            pom.version = '0.4.2'
             pom.groupId = 'com.sikmi'
             pom.artifactId = 'chattextview'
         }
