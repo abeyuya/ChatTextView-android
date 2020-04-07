@@ -25,6 +25,7 @@ class ChatTextView @JvmOverloads constructor(
 
     interface ChatTextViewListener {
         fun didChange(textView: ChatTextView, textBlocks: List<TextBlock>)
+        fun didChange(textView: ChatTextView, isFocused: Boolean)
     }
 
     private val spEditText = SpXEditText(context)
@@ -84,6 +85,10 @@ class ChatTextView @JvmOverloads constructor(
                 }
             }
         })
+
+        spEditText.setOnFocusChangeListener { _, hasFocus ->
+            listener.didChange(this@ChatTextView, hasFocus)
+        }
     }
 
     fun insertPlain(text: String) {

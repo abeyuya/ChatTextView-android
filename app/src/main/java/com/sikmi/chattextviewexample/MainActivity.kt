@@ -29,6 +29,10 @@ class MainActivity : AppCompatActivity(),
                 Log.d("ChatTextView", textBlocks.toString())
                 sendButton.isEnabled = textBlocks.isNotEmpty()
             }
+
+            override fun didChange(textView: ChatTextView, isFocused: Boolean) {
+                Log.d("ChatTextView", "isFocused" + isFocused.toString())
+            }
         })
 
         setupSendButton()
