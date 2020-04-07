@@ -135,6 +135,10 @@ class ChatTextView @JvmOverloads constructor(
         )
     }
 
+    override fun isFocused(): Boolean {
+        return spEditText.isFocused()
+    }
+
     //
     // private methods
     //
