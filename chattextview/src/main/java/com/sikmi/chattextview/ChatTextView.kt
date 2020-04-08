@@ -31,6 +31,7 @@ class ChatTextView @JvmOverloads constructor(
     private val spEditText = SpXEditText(context)
 
     init {
+        isFocusableInTouchMode = true
         spEditText.maxLines = 3
         spEditText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
         spEditText.background = null
