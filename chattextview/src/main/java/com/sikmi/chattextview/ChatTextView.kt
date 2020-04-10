@@ -6,6 +6,7 @@ import android.text.*
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.RelativeLayout
 import androidx.core.text.getSpans
 import java.io.IOException
@@ -118,6 +119,12 @@ class ChatTextView @JvmOverloads constructor(
         spEditText.setText("")
     }
 
+    fun setFocusAndShowKeyboard() {
+        spEditText.requestFocus()
+        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(spEditText, InputMethodManager.SHOW_IMPLICIT)
+    }
+
     fun render(textBlocks: List<TextBlock>) {
         textBlocks.forEach {
             when (it) {
@@ -142,7 +149,7 @@ class ChatTextView @JvmOverloads constructor(
     }
 
     override fun isFocused(): Boolean {
-        return spEditText.isFocused()
+        return spEditText.isFocused
     }
 
     //
