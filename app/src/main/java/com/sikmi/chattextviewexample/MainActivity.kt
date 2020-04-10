@@ -33,6 +33,10 @@ class MainActivity : AppCompatActivity(),
             override fun didChange(textView: ChatTextView, isFocused: Boolean) {
                 Log.d("ChatTextView", "isFocused" + isFocused.toString())
             }
+
+            override fun didChange(textView: ChatTextView, contentSize: Size) {
+                Log.d("ChatTextView", "contentSize" + contentSize.toString())
+            }
         })
 
         setupSendButton()

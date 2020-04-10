@@ -27,6 +27,7 @@ class ChatTextView @JvmOverloads constructor(
     interface ChatTextViewListener {
         fun didChange(textView: ChatTextView, textBlocks: List<TextBlock>)
         fun didChange(textView: ChatTextView, isFocused: Boolean)
+        fun didChange(textView: ChatTextView, contentSize: Size)
     }
 
     private val spEditText = SpXEditText(context)
@@ -45,6 +46,12 @@ class ChatTextView @JvmOverloads constructor(
         )
     }
 
+    private fun getContentSize(): Size {
+        val width = spEditText.width
+        val height = spEditText.height
+        return Size(width = width.toFloat(), height = height.toFloat())
+    }
+
     fun setup(listener: ChatTextViewListener) {
         spEditText.addTextChangedListener(object: TextWatcher {
             private var shouldDeleteMentionSpans = listOf<MentionSpan>()
@@ -58,6 +65,9 @@ class ChatTextView @JvmOverloads constructor(
                     s.delete(start, end)
                 }
                 shouldDeleteMentionSpans = listOf()
+
+                val size = getContentSize()
+                listener.didChange(this@ChatTextView, size)
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
