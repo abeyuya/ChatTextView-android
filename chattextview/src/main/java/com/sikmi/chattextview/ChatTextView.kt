@@ -31,6 +31,7 @@ class ChatTextView @JvmOverloads constructor(
     }
 
     private val spEditText = SpXEditText(context)
+    private lateinit var listener: ChatTextViewListener
 
     init {
         isFocusableInTouchMode = true
@@ -46,13 +47,9 @@ class ChatTextView @JvmOverloads constructor(
         )
     }
 
-    private fun getContentSize(): Size {
-        val width = spEditText.width
-        val height = spEditText.height
-        return Size(width = width.toFloat(), height = height.toFloat())
-    }
-
     fun setup(listener: ChatTextViewListener) {
+        this.listener = listener
+
         spEditText.addTextChangedListener(object: TextWatcher {
             private var shouldDeleteMentionSpans = listOf<MentionSpan>()
 
@@ -65,9 +62,6 @@ class ChatTextView @JvmOverloads constructor(
                     s.delete(start, end)
                 }
                 shouldDeleteMentionSpans = listOf()
-
-                val size = getContentSize()
-                listener.didChange(this@ChatTextView, size)
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -160,6 +154,15 @@ class ChatTextView @JvmOverloads constructor(
 
     override fun isFocused(): Boolean {
         return spEditText.isFocused
+    }
+
+    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+        super.onLayout(changed, l, t, r, b)
+
+        if (changed) {
+            val size = Size(width = this.width.toFloat(), height = this.height.toFloat())
+            listener.didChange(this@ChatTextView, size)
+        }
     }
 
     //
