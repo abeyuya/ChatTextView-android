@@ -1,5 +1,6 @@
 package com.sikmi.chattextview
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.text.*
@@ -31,7 +32,7 @@ class ChatTextView @JvmOverloads constructor(
     }
 
     private val spEditText = SpXEditText(context)
-    private lateinit var listener: ChatTextViewListener
+    private var listener: ChatTextViewListener? = null
 
     init {
         isFocusableInTouchMode = true
@@ -42,7 +43,7 @@ class ChatTextView @JvmOverloads constructor(
             spEditText,
             LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
+                ViewGroup.LayoutParams.WRAP_CONTENT
             )
         )
     }
@@ -156,12 +157,16 @@ class ChatTextView @JvmOverloads constructor(
         return spEditText.isFocused
     }
 
+    @SuppressLint("DrawAllocation")
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         super.onLayout(changed, l, t, r, b)
 
         if (changed) {
-            val size = Size(width = this.width.toFloat(), height = this.height.toFloat())
-            listener.didChange(this@ChatTextView, size)
+            val size = Size(
+                width = this.measuredWidth.toFloat(),
+                height = this.measuredHeight.toFloat()
+            )
+            listener?.didChange(this@ChatTextView, size)
         }
     }
 
