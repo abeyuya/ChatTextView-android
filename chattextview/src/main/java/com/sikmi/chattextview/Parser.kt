@@ -33,7 +33,7 @@ data class TextBlockCustomEmoji(
 data class TextBlockMention(
     override val type: TextBlockType = TextBlockType.MENTION,
     val displayString: String,
-    val hiddenString: String
+    val metadata: String
 ) : TextBlock
 
 data class BlockInfo(

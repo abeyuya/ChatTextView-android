@@ -26,7 +26,7 @@ class MentionSelectDialog : DialogFragment() {
                     val m = TextBlockMention(
                         type = TextBlockType.MENTION,
                         displayString = s.toString(),
-                        hiddenString = "<mention: ${s}>"
+                        metadata = ""
                     )
                     listener.onMentionClick(m)
                 }
