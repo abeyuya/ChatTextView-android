@@ -3,6 +3,7 @@ package com.sikmi.chattextview
 import android.content.Context
 import android.graphics.Color
 import android.text.*
+import android.text.method.ScrollingMovementMethod
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
@@ -40,6 +41,10 @@ class ChatTextView @JvmOverloads constructor(
         spEditText.maxLines = MAX_LINE_COUNT
         spEditText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
         spEditText.background = null
+
+        // https://stackoverflow.com/questions/19826693/how-can-i-make-a-textview-automatically-scroll-as-i-add-more-lines-of-text
+        spEditText.movementMethod = ScrollingMovementMethod()
+
         addView(
             spEditText,
             LayoutParams(
