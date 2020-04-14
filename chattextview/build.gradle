@@ -58,7 +58,7 @@ uploadArchives {
     repositories {
         mavenDeployer {
             repository url: "file://${repo.absolutePath}"
-            pom.version = '0.4.11'
+            pom.version = '0.4.12'
             pom.groupId = 'com.sikmi'
             pom.artifactId = 'chattextview'
         }
