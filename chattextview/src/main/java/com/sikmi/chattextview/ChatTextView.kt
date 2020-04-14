@@ -37,7 +37,7 @@ class ChatTextView @JvmOverloads constructor(
 
     init {
         isFocusableInTouchMode = true
-        spEditText.maxLines = 3
+        spEditText.maxLines = MAX_LINE_COUNT
         spEditText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
         spEditText.background = null
         addView(
@@ -65,7 +65,9 @@ class ChatTextView @JvmOverloads constructor(
 
                 val totalHeight = min(spEditText.lineCount, MAX_LINE_COUNT) *
                         (spEditText.lineHeight + spEditText.lineSpacingExtra) *
-                        spEditText.lineSpacingMultiplier
+                        spEditText.lineSpacingMultiplier +
+                        spEditText.compoundPaddingTop +
+                        spEditText.compoundPaddingBottom
 
                 val size = Size(width = 0f, height = totalHeight)
                 listener.didChange(this@ChatTextView, size)
