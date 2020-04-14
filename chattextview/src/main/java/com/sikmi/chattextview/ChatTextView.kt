@@ -3,9 +3,8 @@ package com.sikmi.chattextview
 import android.content.Context
 import android.graphics.Color
 import android.text.*
-import android.text.method.ScrollingMovementMethod
 import android.util.AttributeSet
-import android.view.Gravity
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -20,7 +19,6 @@ import com.sunhapper.x.spedit.view.SpXEditText
 
 import com.bumptech.glide.Glide
 import kotlin.math.min
-import kotlin.math.roundToInt
 
 class ChatTextView @JvmOverloads constructor(
     context: Context,
@@ -34,18 +32,13 @@ class ChatTextView @JvmOverloads constructor(
         fun didChange(textView: ChatTextView, contentSize: Size)
     }
 
-    private val spEditText = SpXEditText(context)
+    public val spEditText = SpXEditText(context)
     public var MAX_LINE_COUNT = 5
 
     init {
-        isFocusableInTouchMode = true
         spEditText.maxLines = MAX_LINE_COUNT
         spEditText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
         spEditText.background = null
-
-        // https://stackoverflow.com/a/24530484
-        spEditText.movementMethod = ScrollingMovementMethod()
-        spEditText.gravity = Gravity.BOTTOM
 
         addView(
             spEditText,
@@ -70,14 +63,8 @@ class ChatTextView @JvmOverloads constructor(
                 }
                 shouldDeleteMentionSpans = listOf()
 
-                val totalHeight = min(spEditText.lineCount, MAX_LINE_COUNT) *
-                        (spEditText.lineHeight + spEditText.lineSpacingExtra) *
-                        spEditText.lineSpacingMultiplier +
-                        spEditText.compoundPaddingTop +
-                        spEditText.compoundPaddingBottom
-
-                val size = Size(width = 0f, height = totalHeight)
-                listener.didChange(this@ChatTextView, size)
+                didChangeContentSize(listener)
+                scrollForNewLine()
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -205,5 +192,25 @@ class ChatTextView @JvmOverloads constructor(
             .into(DrawableTarget(proxyDrawable))
 
         return CustomEmojiSpan.createResizeGifDrawableSpan(proxyDrawable, emoji)
+    }
+
+    private fun didChangeContentSize(listener: ChatTextViewListener) {
+        val totalHeight = min(spEditText.lineCount, MAX_LINE_COUNT) *
+                (spEditText.lineHeight + spEditText.lineSpacingExtra) *
+                spEditText.lineSpacingMultiplier +
+                spEditText.compoundPaddingTop +
+                spEditText.compoundPaddingBottom
+
+        val size = Size(width = 0f, height = totalHeight)
+        listener.didChange(this@ChatTextView, size)
+    }
+
+    // https://stackoverflow.com/a/7350267
+    private fun scrollForNewLine() {
+        val scrollAmount = spEditText.layout.getLineTop(spEditText.lineCount) - spEditText.height;
+        if (scrollAmount > 0) {
+            Log.d("ChatTextView", "scrollExec!! " + scrollAmount.toString())
+            spEditText.scrollTo(0, scrollAmount)
+        }
     }
 }
