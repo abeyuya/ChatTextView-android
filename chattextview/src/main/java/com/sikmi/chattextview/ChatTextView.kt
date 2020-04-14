@@ -17,6 +17,7 @@ import com.sunhapper.x.spedit.insertSpannableString
 import com.sunhapper.x.spedit.view.SpXEditText
 
 import com.bumptech.glide.Glide
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 class ChatTextView @JvmOverloads constructor(
@@ -32,6 +33,7 @@ class ChatTextView @JvmOverloads constructor(
     }
 
     private val spEditText = SpXEditText(context)
+    public var MAX_LINE_COUNT = 5
 
     init {
         isFocusableInTouchMode = true
@@ -61,15 +63,11 @@ class ChatTextView @JvmOverloads constructor(
                 }
                 shouldDeleteMentionSpans = listOf()
 
-                val totalHeight = (
-                        spEditText.lineCount
-                                * (spEditText.lineHeight + spEditText.lineSpacingExtra)
-                                * spEditText.lineSpacingMultiplier
-                        ).roundToInt()
-                    + spEditText.compoundPaddingTop
-                    + spEditText.compoundPaddingBottom
+                val totalHeight = min(spEditText.lineCount, MAX_LINE_COUNT) *
+                        (spEditText.lineHeight + spEditText.lineSpacingExtra) *
+                        spEditText.lineSpacingMultiplier
 
-                val size = Size(width = 0f, height = totalHeight.toFloat())
+                val size = Size(width = 0f, height = totalHeight)
                 listener.didChange(this@ChatTextView, size)
             }
 
