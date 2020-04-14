@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.text.*
 import android.text.method.ScrollingMovementMethod
 import android.util.AttributeSet
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -42,8 +43,9 @@ class ChatTextView @JvmOverloads constructor(
         spEditText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
         spEditText.background = null
 
-        // https://stackoverflow.com/questions/19826693/how-can-i-make-a-textview-automatically-scroll-as-i-add-more-lines-of-text
+        // https://stackoverflow.com/a/24530484
         spEditText.movementMethod = ScrollingMovementMethod()
+        spEditText.gravity = Gravity.BOTTOM
 
         addView(
             spEditText,
