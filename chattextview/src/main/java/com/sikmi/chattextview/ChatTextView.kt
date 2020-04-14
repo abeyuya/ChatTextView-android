@@ -1,6 +1,5 @@
 package com.sikmi.chattextview
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.text.*
@@ -18,6 +17,7 @@ import com.sunhapper.x.spedit.insertSpannableString
 import com.sunhapper.x.spedit.view.SpXEditText
 
 import com.bumptech.glide.Glide
+import kotlin.math.roundToInt
 
 class ChatTextView @JvmOverloads constructor(
     context: Context,
@@ -32,7 +32,6 @@ class ChatTextView @JvmOverloads constructor(
     }
 
     private val spEditText = SpXEditText(context)
-    private var listener: ChatTextViewListener? = null
 
     init {
         isFocusableInTouchMode = true
@@ -49,8 +48,6 @@ class ChatTextView @JvmOverloads constructor(
     }
 
     fun setup(listener: ChatTextViewListener) {
-        this.listener = listener
-
         spEditText.addTextChangedListener(object: TextWatcher {
             private var shouldDeleteMentionSpans = listOf<MentionSpan>()
 
@@ -63,6 +60,17 @@ class ChatTextView @JvmOverloads constructor(
                     s.delete(start, end)
                 }
                 shouldDeleteMentionSpans = listOf()
+
+                val totalHeight = (
+                        spEditText.lineCount
+                                * (spEditText.lineHeight + spEditText.lineSpacingExtra)
+                                * spEditText.lineSpacingMultiplier
+                        ).roundToInt()
+                    + spEditText.compoundPaddingTop
+                    + spEditText.compoundPaddingBottom
+
+                val size = Size(width = 0f, height = totalHeight.toFloat())
+                listener.didChange(this@ChatTextView, size)
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -155,19 +163,6 @@ class ChatTextView @JvmOverloads constructor(
 
     override fun isFocused(): Boolean {
         return spEditText.isFocused
-    }
-
-    @SuppressLint("DrawAllocation")
-    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        super.onLayout(changed, l, t, r, b)
-
-        if (changed) {
-            val size = Size(
-                width = this.measuredWidth.toFloat(),
-                height = this.measuredHeight.toFloat()
-            )
-            listener?.didChange(this@ChatTextView, size)
-        }
     }
 
     //
