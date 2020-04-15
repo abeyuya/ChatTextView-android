@@ -207,9 +207,7 @@ class ChatTextView @JvmOverloads constructor(
 
     // https://stackoverflow.com/a/7350267
     private fun scrollForNewLine() {
-        val scrollAmount = spEditText.layout.getLineTop(spEditText.lineCount)
-            - spEditText.height
-            - debugScrollOffset
+        val scrollAmount = spEditText.layout.getLineTop(spEditText.lineCount) - spEditText.height + debugScrollOffset
 
         if (scrollAmount > 0) {
             spEditText.scrollTo(0, scrollAmount)
