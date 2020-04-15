@@ -38,7 +38,6 @@ class ChatTextView @JvmOverloads constructor(
         spEditText.maxLines = MAX_LINE_COUNT
         spEditText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
         spEditText.background = null
-        spEditText.setPadding(0, 0, 0, 0)
 
         addView(
             spEditText,
