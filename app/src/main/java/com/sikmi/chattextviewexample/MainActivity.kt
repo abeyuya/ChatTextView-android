@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity(),
                 Log.d("ChatTextView", "isFocused" + isFocused.toString())
             }
 
-            override fun didChange(textView: ChatTextView, contentSize: Size) {
+            override fun didChange(textView: ChatTextView, contentSize: ChatTextView.Size) {
                 Log.d("ChatTextView", "contentSize" + contentSize.toString())
             }
         })
