@@ -5,7 +5,6 @@ import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
-import com.sikmi.chattextview.Size
 import com.sikmi.chattextview.TextBlockCustomEmoji
 import com.sikmi.chattextview.TextBlockType
 
@@ -35,8 +34,7 @@ class CustomEmojiSelectDialog: DialogFragment() {
                     val e = TextBlockCustomEmoji(
                         type = TextBlockType.CUSTOM_EMOJI,
                         displayImageUrl = url[which],
-                        escapedString = s.toString(),
-                        size = Size(width = 17f, height = 17f)
+                        escapedString = s.toString()
                     )
                     listener.onCustomEmojiClick(e)
                 }

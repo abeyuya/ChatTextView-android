@@ -25,6 +25,11 @@ class ChatTextView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : RelativeLayout(context, attrs, defStyleAttr) {
 
+    data class Size(
+        val width: Float,
+        val height: Float
+    )
+
     interface ChatTextViewListener {
         fun didChange(textView: ChatTextView, textBlocks: List<TextBlock>)
         fun didChange(textView: ChatTextView, isFocused: Boolean)

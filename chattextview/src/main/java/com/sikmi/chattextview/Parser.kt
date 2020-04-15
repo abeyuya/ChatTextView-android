@@ -3,10 +3,6 @@ package com.sikmi.chattextview
 import android.text.Spannable
 import androidx.core.text.getSpans
 
-data class Size(
-    val width: Float,
-    val height: Float
-)
 
 enum class TextBlockType {
     PLAIN,
@@ -26,8 +22,7 @@ data class TextBlockPlain(
 data class TextBlockCustomEmoji(
     override val type: TextBlockType = TextBlockType.CUSTOM_EMOJI,
     val displayImageUrl: String,
-    val escapedString: String,
-    val size: Size
+    val escapedString: String
 ) : TextBlock
 
 data class TextBlockMention(
