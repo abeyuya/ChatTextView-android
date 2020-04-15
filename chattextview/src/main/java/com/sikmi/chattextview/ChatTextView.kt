@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Color
 import android.text.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -34,6 +33,7 @@ class ChatTextView @JvmOverloads constructor(
 
     public val spEditText = SpXEditText(context)
     public var MAX_LINE_COUNT = 5
+    public var debugScrollOffset = 0
 
     init {
         spEditText.maxLines = MAX_LINE_COUNT
@@ -207,9 +207,11 @@ class ChatTextView @JvmOverloads constructor(
 
     // https://stackoverflow.com/a/7350267
     private fun scrollForNewLine() {
-        val scrollAmount = spEditText.layout.getLineTop(spEditText.lineCount) - spEditText.height;
+        val scrollAmount = spEditText.layout.getLineTop(spEditText.lineCount)
+            - spEditText.height
+            - debugScrollOffset
+
         if (scrollAmount > 0) {
-            Log.d("ChatTextView", "scrollExec!! " + scrollAmount.toString())
             spEditText.scrollTo(0, scrollAmount)
         }
     }
