@@ -38,7 +38,6 @@ class ChatTextView @JvmOverloads constructor(
         spEditText.maxLines = MAX_LINE_COUNT
         spEditText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
         spEditText.background = null
-        spEditText.setPadding(0, 0, 0, 0)
 
         addView(
             spEditText,
@@ -195,13 +194,14 @@ class ChatTextView @JvmOverloads constructor(
     }
 
     private fun computedLineHeight(): Float {
-        return (spEditText.lineHeight + spEditText.lineSpacingExtra) * spEditText.lineSpacingMultiplier
+        return (spEditText.lineHeight + spEditText.lineSpacingExtra) *
+                spEditText.lineSpacingMultiplier
     }
 
     private fun didChangeContentSize(listener: ChatTextViewListener) {
-        val totalHeight = min(spEditText.lineCount, MAX_LINE_COUNT) * computedLineHeight()
-            + spEditText.compoundPaddingTop
-            + spEditText.compoundPaddingBottom
+        val totalHeight = min(spEditText.lineCount, MAX_LINE_COUNT) * computedLineHeight() +
+                spEditText.compoundPaddingTop +
+                spEditText.compoundPaddingBottom
 
         val size = Size(width = 0f, height = totalHeight)
         listener.didChange(this@ChatTextView, size)
@@ -210,6 +210,7 @@ class ChatTextView @JvmOverloads constructor(
     // https://stackoverflow.com/a/7350267
     private fun scrollForNewLine() {
         val scrollAmount = spEditText.layout.getLineTop(spEditText.lineCount)
+            + spEditText.lineHeight
             - spEditText.height
 
         if (scrollAmount > 0) {
