@@ -33,7 +33,7 @@ class ChatTextView @JvmOverloads constructor(
 
     public val spEditText = SpXEditText(context)
     public var MAX_LINE_COUNT = 5
-    public var scrollOffset = 0
+    public var debugScrollOffset = 0
 
     init {
         spEditText.maxLines = MAX_LINE_COUNT
@@ -194,14 +194,12 @@ class ChatTextView @JvmOverloads constructor(
         return CustomEmojiSpan.createResizeGifDrawableSpan(proxyDrawable, emoji)
     }
 
-    private fun computedLineHeight(): Float {
-        return (spEditText.lineHeight + spEditText.lineSpacingExtra) * spEditText.lineSpacingMultiplier
-    }
-
     private fun didChangeContentSize(listener: ChatTextViewListener) {
-        val totalHeight = min(spEditText.lineCount, MAX_LINE_COUNT) * computedLineHeight()
-            + spEditText.compoundPaddingTop
-            + spEditText.compoundPaddingBottom
+        val totalHeight = min(spEditText.lineCount, MAX_LINE_COUNT) *
+                (spEditText.lineHeight + spEditText.lineSpacingExtra) *
+                spEditText.lineSpacingMultiplier +
+                spEditText.compoundPaddingTop +
+                spEditText.compoundPaddingBottom
 
         val size = Size(width = 0f, height = totalHeight)
         listener.didChange(this@ChatTextView, size)
@@ -210,8 +208,8 @@ class ChatTextView @JvmOverloads constructor(
     // https://stackoverflow.com/a/7350267
     private fun scrollForNewLine() {
         val scrollAmount = spEditText.layout.getLineTop(spEditText.lineCount)
-            + scrollOffset
             - spEditText.height
+            - debugScrollOffset
 
         if (scrollAmount > 0) {
             spEditText.scrollTo(0, scrollAmount)
