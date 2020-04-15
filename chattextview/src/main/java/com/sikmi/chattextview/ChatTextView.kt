@@ -33,6 +33,7 @@ class ChatTextView @JvmOverloads constructor(
 
     public val spEditText = SpXEditText(context)
     public var MAX_LINE_COUNT = 5
+    public var scrollOffset = 0
 
     init {
         spEditText.maxLines = MAX_LINE_COUNT
@@ -209,6 +210,7 @@ class ChatTextView @JvmOverloads constructor(
     // https://stackoverflow.com/a/7350267
     private fun scrollForNewLine() {
         val scrollAmount = spEditText.layout.getLineTop(spEditText.lineCount)
+            + scrollOffset
             - spEditText.height
 
         if (scrollAmount > 0) {
