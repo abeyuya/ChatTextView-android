@@ -40,6 +40,7 @@ class ChatTextView @JvmOverloads constructor(
     public var MAX_LINE_COUNT = 5
 
     init {
+        isFocusableInTouchMode = true
         spEditText.maxLines = MAX_LINE_COUNT
         spEditText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
         spEditText.background = null
