@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.text.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -193,13 +194,10 @@ class ChatTextView @JvmOverloads constructor(
         return CustomEmojiSpan.createResizeGifDrawableSpan(proxyDrawable, emoji)
     }
 
-    private fun computedLineHeight(): Float {
-        return (spEditText.lineHeight + spEditText.lineSpacingExtra) *
-                spEditText.lineSpacingMultiplier
-    }
-
     private fun didChangeContentSize(listener: ChatTextViewListener) {
-        val totalHeight = min(spEditText.lineCount, MAX_LINE_COUNT) * computedLineHeight() +
+        val totalHeight = min(spEditText.lineCount, MAX_LINE_COUNT) *
+                (spEditText.lineHeight + spEditText.lineSpacingExtra) *
+                spEditText.lineSpacingMultiplier +
                 spEditText.compoundPaddingTop +
                 spEditText.compoundPaddingBottom
 
@@ -209,11 +207,9 @@ class ChatTextView @JvmOverloads constructor(
 
     // https://stackoverflow.com/a/7350267
     private fun scrollForNewLine() {
-        val scrollAmount = spEditText.layout.getLineTop(spEditText.lineCount)
-            + computedLineHeight()
-            - spEditText.height
-
+        val scrollAmount = spEditText.layout.getLineTop(spEditText.lineCount) - spEditText.height;
         if (scrollAmount > 0) {
+            Log.d("ChatTextView", "scrollExec!! " + scrollAmount.toString())
             spEditText.scrollTo(0, scrollAmount)
         }
     }
