@@ -106,13 +106,17 @@ class ChatTextView @JvmOverloads constructor(
     }
 
     fun insertPlain(text: String) {
-        this.spEditText.text?.append(text)
+        this.post {
+            this.spEditText.text?.append(text)
+        }
     }
 
     fun insertCustomEmoji(emoji: TextBlockCustomEmoji) {
         spEditText.text?.let {
             val charSequence = createGlideText(emoji)
-            insertSpannableString(it, charSequence)
+            this.post {
+                insertSpannableString(it, charSequence)
+            }
         }
     }
 
@@ -128,7 +132,9 @@ class ChatTextView @JvmOverloads constructor(
     }
 
     fun clear() {
-        spEditText.setText("")
+        this.post {
+            spEditText.setText("")
+        }
     }
 
     fun setFocusAndShowKeyboard() {
@@ -183,7 +189,9 @@ class ChatTextView @JvmOverloads constructor(
 
     private fun replace(charSequence: CharSequence) {
         spEditText.text?.let {
-            insertSpannableString(it, charSequence)
+            this.post {
+                insertSpannableString(it, charSequence)
+            }
         }
     }
 
