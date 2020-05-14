@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.text.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -56,7 +57,7 @@ class ChatTextView @JvmOverloads constructor(
 
     fun setup(listener: ChatTextViewListener) {
         spEditText.addTextChangedListener(object: TextWatcher {
-            private var shouldDeleteMentionSpans = listOf<MentionSpan>()
+            private var shouldDeleteMentionSpans = mutableListOf<MentionSpan>()
 
             override fun afterTextChanged(s: Editable?) {
                 for (span in shouldDeleteMentionSpans) {
@@ -66,7 +67,7 @@ class ChatTextView @JvmOverloads constructor(
                     if (end == -1) { continue }
                     s.delete(start, end)
                 }
-                shouldDeleteMentionSpans = listOf()
+                shouldDeleteMentionSpans = mutableListOf()
 
                 didChangeContentSize(listener)
                 scrollForNewLine()
@@ -74,15 +75,11 @@ class ChatTextView @JvmOverloads constructor(
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
                 if (after < count) {
-                    val deleted = s?.subSequence(
-                        start + after,
-                        start + after + count
-                    ) as? Spannable ?: return
-
-                     shouldDeleteMentionSpans = deleted
-                         .getSpans<MentionSpan>(0, deleted.length)
-                         .toList()
+                    handleTextWillDelete(s, start, count, after)
+                    return
                 }
+
+                handleTextWillInsertOrUpdate(s, start, count, after)
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -91,12 +88,72 @@ class ChatTextView @JvmOverloads constructor(
                     return
                 }
 
-                val spannable = s as? Spannable
+                val spannable = s as? Spannable ?: return
 
-                spannable?.let {
-                    val blocks = Parser.parse(it)
-                    listener.didChange(this@ChatTextView, blocks)
+                val blocks = Parser.parse(spannable)
+                listener.didChange(this@ChatTextView, blocks)
+            }
+
+            private fun pickMentionSpans(spannable: Spannable): List<MentionSpan> {
+                return spannable
+                        .getSpans<MentionSpan>(0, spannable.length)
+                        .toList()
+            }
+
+            private fun handleTextWillDelete(s: CharSequence?, start: Int, count: Int, after: Int) {
+                val deleted = s?.subSequence(
+                        start + after,
+                        start + after + count
+                ) as? Spannable ?: return
+
+                shouldDeleteMentionSpans.addAll(pickMentionSpans(deleted))
+                return
+            }
+
+            private fun handleTextWillInsertOrUpdate(s: CharSequence?, start: Int, count: Int, after: Int) {
+                Log.d("ChatTextView.s", s.toString())
+                Log.d("ChatTextView.start", start.toString())
+                Log.d("ChatTextView.count", count.toString())
+                Log.d("ChatTextView.after", after.toString())
+
+                // ignore insert to top of text
+                if (start < 1) {
+                    return
                 }
+
+                // ignore no insert
+                if (after < 1) {
+                    return
+                }
+
+                // ignore insert to end of text
+                if (s.toString().length < start + after) {
+                    return
+                }
+
+                val beforeSpannable = s?.subSequence(start - 1, start) as? Spannable ?: return
+                val beforeMentionSpan = pickMentionSpans(beforeSpannable)
+                if (beforeMentionSpan.isEmpty()) {
+                    return
+                }
+
+                val afterSpannable = s.subSequence(start + count, start + count + 1) as? Spannable ?: return
+                val afterMentionSpan = pickMentionSpans(afterSpannable)
+                if (afterMentionSpan.isEmpty()) {
+                    return
+                }
+
+                val allSpannable = s as? Spannable ?: return
+                val beforeMentionId = beforeMentionSpan.firstOrNull()?.mentionId ?: return
+                val afterMentionId = afterMentionSpan.firstOrNull()?.mentionId ?: return
+
+                if (beforeMentionId == afterMentionId) {
+                    val allMentionSpans = pickMentionSpans(allSpannable)
+                    val deleteTargetMentionSpan = allMentionSpans.firstOrNull { it.mentionId == afterMentionId }
+                    deleteTargetMentionSpan?.let { shouldDeleteMentionSpans.add(it) }
+                }
+
+                return
             }
         })
 
