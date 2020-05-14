@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Color
 import android.text.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -61,11 +60,8 @@ class ChatTextView @JvmOverloads constructor(
 
             override fun afterTextChanged(s: Editable?) {
                 for (span in shouldDeleteMentionSpans) {
-                    val start = s?.getSpanStart(span) ?: continue
-                    if (start == -1) { continue }
-                    val end = s.getSpanEnd(span)
-                    if (end == -1) { continue }
-                    s.delete(start, end)
+                    val editable = s ?: return
+                    deleteMensionSpan(s, span)
                 }
                 shouldDeleteMentionSpans = mutableListOf()
 
@@ -94,6 +90,14 @@ class ChatTextView @JvmOverloads constructor(
                 listener.didChange(this@ChatTextView, blocks)
             }
 
+            private fun deleteMensionSpan(s: Editable, span: MentionSpan) {
+                val start = s.getSpanStart(span) ?: return
+                if (start == -1) { return }
+                val end = s.getSpanEnd(span)
+                if (end == -1) { return }
+                s.delete(start, end)
+            }
+
             private fun pickMentionSpans(spannable: Spannable): List<MentionSpan> {
                 return spannable
                         .getSpans<MentionSpan>(0, spannable.length)
@@ -111,11 +115,6 @@ class ChatTextView @JvmOverloads constructor(
             }
 
             private fun handleTextWillInsertOrUpdate(s: CharSequence?, start: Int, count: Int, after: Int) {
-                Log.d("ChatTextView.s", s.toString())
-                Log.d("ChatTextView.start", start.toString())
-                Log.d("ChatTextView.count", count.toString())
-                Log.d("ChatTextView.after", after.toString())
-
                 // ignore insert to top of text
                 if (start < 1) {
                     return
